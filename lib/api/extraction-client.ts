@@ -22,6 +22,24 @@ export class ExtractionApiClient {
                 body,
             });
 
+            if (!response.ok) {
+                const text = await response.text();
+                return {
+                    success: false,
+                    error: `Erreur ${response.status}`,
+                    details: text.substring(0, 200),
+                };
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType?.includes('application/json')) {
+                return {
+                    success: false,
+                    error: 'Réponse invalide du serveur',
+                    details: 'Le serveur n\'a pas retourné du JSON',
+                };
+            }
+
             return await response.json();
         } catch (error) {
             return {

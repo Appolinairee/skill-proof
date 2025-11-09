@@ -1,3 +1,4 @@
+import { ROLES } from "@/utils/constants/users";
 import {
   adminNavLinks,
   companyNavLinks,
@@ -7,7 +8,6 @@ import {
 } from "./LinksData";
 import MoreButton from "./MoreButton";
 import NavLinkItem from "./NavLinkItem";
-import { ROLES } from "@/utils/constants/users";
 
 interface SideBarLinksProps {
   pathname: string;
@@ -29,8 +29,6 @@ export default function SideBarLinks({
     navLinks = adminNavLinks;
   } else if (userRole === ROLES.COMPANY) {
     navLinks = companyNavLinks;
-  } else if (userRole === ROLES.RESELLER) {
-    navLinks = resellerNavLinks;
   }
 
   return (
@@ -47,7 +45,7 @@ export default function SideBarLinks({
         ))}
       </div>
 
-      {user && userRole !== ROLES.RESELLER && <MoreButton pathname={pathname} />}
+      {/* {user && userRole !== ROLES.RESELLER && <MoreButton pathname={pathname} />} */}
     </nav>
   );
 }

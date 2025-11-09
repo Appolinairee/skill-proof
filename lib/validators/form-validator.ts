@@ -4,15 +4,16 @@ export class FormValidator {
   validate(data: ExtractionFormData): ExtractionFormErrors {
     const errors: ExtractionFormErrors = {};
 
-    this.validateName(data.name, errors);
     this.validateAtLeastOneSource(data, errors);
+    this.validateName(data.name, errors);
     this.validateGithubUrl(data.githubUrl, errors);
 
     return errors;
   }
 
   private validateName(name: string, errors: ExtractionFormErrors): void {
-    if (!name || name.trim().length === 0) {
+    const hasName = name && name.trim().length > 0;
+    if (!hasName) {
       errors.name = 'Le nom est requis';
     }
   }

@@ -17,7 +17,7 @@ export default function HomePage() {
     if (!form.state.isValid) return;
 
     form.setSubmitting(true);
-    
+
     try {
       const result = await apiClient.extract(form.state.data);
       setResponse(result);
@@ -27,10 +27,19 @@ export default function HomePage() {
   };
 
   const handleInputChange = (value: string) => {
-    if (value.includes('github.com') || value.match(/^[a-zA-Z0-9-]+$/)) {
-      form.setGithubUrl(value);
-    } else {
-      form.setLinkedinText(value);
+    const trimmedValue = value.trim();
+
+    if (trimmedValue.includes('github.com') || trimmedValue.match(/^[a-zA-Z0-9-]+$/)) {
+      form.setGithubUrl(trimmedValue);
+      if (!form.state.data.name) {
+        form.setName(trimmedValue.split('/').pop() || trimmedValue);
+      }
+    } else if (trimmedValue.length > 0) {
+      if (trimmedValue.includes('linkedin.com') || trimmedValue.length > 50) {
+        form.setLinkedinText(trimmedValue);
+      } else {
+        form.setName(trimmedValue);
+      }
     }
   };
 
@@ -39,21 +48,15 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-4xl space-y-8">
           <Header />
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <NameInput 
-              value={form.state.data.name}
-              onChange={form.setName}
-              error={form.state.errors.name}
-              disabled={form.state.isSubmitting}
-            />
 
+          <form onSubmit={handleSubmit} className="space-y-6">
             <ExtractionInput
-              value={form.state.data.githubUrl || form.state.data.linkedinText}
+              value={form.state.data.name || form.state.data.githubUrl || form.state.data.linkedinText}
               onChange={handleInputChange}
               onFileSelect={form.setCvFile}
               selectedFile={form.state.data.cvFile}
               disabled={form.state.isSubmitting}
+              canSubmit={form.state.isValid}
             />
 
             {form.state.errors.general && (
@@ -76,36 +79,8 @@ function Header() {
         Analysez votre profil professionnel
       </h1>
       <p className="text-gray-600">
-        Uploadez votre CV, partagez votre GitHub ou LinkedIn pour une analyse complète
+        Entrez votre nom, uploadez votre CV, ou partagez votre profil GitHub/LinkedIn
       </p>
-    </div>
-  );
-}
-
-function NameInput({ 
-  value, 
-  onChange, 
-  error, 
-  disabled 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  error?: string;
-  disabled: boolean;
-}) {
-  return (
-    <div className="max-w-md mx-auto">
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Votre nom complet"
-        disabled={disabled}
-        className={`w-full px-4 py-3 rounded-lg border ${
-          error ? 'border-red-500' : 'border-gray-300'
-        } bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50`}
-      />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
 }
