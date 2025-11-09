@@ -32,25 +32,25 @@ export default function HomePage() {
 
   const handleInputChange = (value: string) => {
     // Détection intelligente du type d'input
-    
+
     // GitHub URL ou username
     if (value.includes('github.com') || value.includes('github.io')) {
       form.setGithubUrl(value);
       form.setName('');
       form.setLinkedinText('');
-    } 
+    }
     // LinkedIn URL
     else if (value.includes('linkedin.com') || value.includes('linkedin.')) {
       form.setLinkedinText(value);
       form.setName('');
       form.setGithubUrl('');
-    } 
+    }
     // Username GitHub simple (pas d'espace, court, alphanum avec tirets)
     else if (value.length > 0 && !value.includes(' ') && value.length < 40 && /^[a-zA-Z0-9_-]+$/.test(value)) {
       form.setGithubUrl(value);
       form.setName('');
       form.setLinkedinText('');
-    } 
+    }
     // Nom complet (contient espace ou caractères spéciaux)
     else {
       form.setName(value);
@@ -141,7 +141,7 @@ function ResultsPreview({ response }: { response: ExtractionResponse }) {
   return (
     <div className="space-y-6">
       {/* Profile Summary */}
-      <ProfileSummary 
+      <ProfileSummary
         name={name}
         summary={summary}
         totalSkills={skills.length}
@@ -177,7 +177,7 @@ function ResultsPreview({ response }: { response: ExtractionResponse }) {
 
       {/* GitHub Repos */}
       {sources?.github?.repos && sources.github.repos.length > 0 && (
-        <GitHubReposList 
+        <GitHubReposList
           repos={sources.github.repos}
           username={sources.github.username}
           totalStars={sources.github.totalStars}
