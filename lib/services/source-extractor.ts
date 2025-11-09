@@ -8,9 +8,18 @@ export class SourceExtractor {
   async extract(input: ExtractionInput): Promise<ExtractedSources> {
     const sources: ExtractedSources = { name: input.name };
 
+    console.log('━━━━━━━━━━ SOURCE EXTRACTION ━━━━━━━━━━');
+    console.log('Input:', {
+      name: input.name,
+      hasCV: !!input.cvFile,
+      hasGithub: !!input.githubUrl,
+      hasLinkedIn: !!input.linkedinText,
+    });
+
     const tasks = this.buildExtractionTasks(input, sources);
     await Promise.all(tasks);
 
+    console.log('✅ Extraction completed');
     return sources;
   }
 

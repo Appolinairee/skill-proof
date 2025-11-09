@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { analyzeWithGemini } from '@/lib/adapters/gemini-adapter';
 import { ExtractionValidator } from '@/lib/services/extraction-validator';
 import { SourceExtractor } from '@/lib/services/source-extractor';
+import { WebSearchService } from '@/lib/services/web-search-service';
+import { ScoringService } from '@/lib/services/scoring-service';
 
 export const runtime = 'nodejs';
 
@@ -15,15 +17,36 @@ export async function POST(request: NextRequest) {
         const extractor = new SourceExtractor();
         const sources = await extractor.extract(input);
 
+        // Web search enrichment
+        const webSearchService = new WebSearchService();
+        const webProfile = await webSearchService.searchPerson(
+            input.name,
+            sources.github?.username
+        );
+
         const analysis = await analyzeWithGemini(
             sources.cv?.rawText,
             sources.github,
-            sources.linkedin
+            sources.linkedin,
+            webProfile // Pass web search results to Gemini
         );
+
+        // Apply scoring and badge assignment
+        const scoringService = new ScoringService();
+        const enrichedSkills = scoringService.processSkills(analysis.skills);
+        const skillsStats = scoringService.getSkillsStats(enrichedSkills);
 
         return NextResponse.json({
             success: true,
-            data: { sources, analysis },
+            data: { 
+                sources, 
+                webProfile, 
+                analysis: {
+                    ...analysis,
+                    skills: enrichedSkills,
+                },
+                stats: skillsStats,
+            },
         });
     } catch (error) {
         return handleError(error);

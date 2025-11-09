@@ -32,6 +32,7 @@ export interface GitHubData {
 export interface LinkedInData {
   rawText: string;
   url?: string; // LinkedIn profile URL if fetched
+  screenshots?: Buffer[]; // Screenshots for Gemini Vision analysis
   parsedSections?: {
     experience?: string;
     education?: string;

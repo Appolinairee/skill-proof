@@ -1,22 +1,16 @@
 import { LinkedInData } from './types';
 import { LinkedInJsonParser } from './linkedin/json-parser';
 import { LinkedInTextParser } from './linkedin/text-parser';
-import { parseLinkedInFromUrl } from './linkedin/url-parser';
+import { captureLinkedInProfile } from './linkedin/screenshot-fetcher';
 
 export async function parseLinkedIn(input: string): Promise<LinkedInData> {
   const data: LinkedInData = { rawText: input };
 
-  // Check if it's a LinkedIn URL
-  if (input.includes('linkedin.com/in/')) {
-    try {
-      const urlData = await parseLinkedInFromUrl(input);
-      data.rawText = urlData.extractedText;
-      data.url = urlData.url;
-    } catch (error) {
-      console.warn('⚠️ LinkedIn URL fetch failed, using input as-is:', error);
-    }
-  }
+  // LinkedIn fetching disabled for MVP - too complex (authwall, slow screenshots)
+  // User can paste LinkedIn text manually instead
+  console.log('ℹ️ LinkedIn parsing désactivé pour MVP - paste texte manuel seulement');
 
+  // Parse text content if provided (fallback)
   const parsedSections = isJsonInput(data.rawText) 
     ? parseAsJson(data.rawText) 
     : parseAsText(data.rawText);

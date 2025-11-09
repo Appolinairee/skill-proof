@@ -5,6 +5,10 @@ import { useExtractionForm } from '@/hooks/useExtractionForm';
 import { ExtractionInput } from '@/components/extraction/ExtractionInput';
 import { ExtractionApiClient } from '@/lib/api/extraction-client';
 import { ExtractionResponse } from '@/lib/api/extraction-client';
+import { SkillCard, Skill } from '@/components/results/SkillCard';
+import { GitHubReposList } from '@/components/results/GitHubReposList';
+import { ProfileSummary } from '@/components/results/ProfileSummary';
+import { SkillsStats } from '@/components/results/SkillsStats';
 
 export default function HomePage() {
   const form = useExtractionForm();
@@ -27,26 +31,30 @@ export default function HomePage() {
   };
 
   const handleInputChange = (value: string) => {
-    // Détection simple et permissive
+    // Détection intelligente du type d'input
+    
+    // GitHub URL ou username
     if (value.includes('github.com') || value.includes('github.io')) {
       form.setGithubUrl(value);
       form.setName('');
       form.setLinkedinText('');
-    } else if (value.includes('linkedin.com') || value.includes('linkedin.')) {
+    } 
+    // LinkedIn URL
+    else if (value.includes('linkedin.com') || value.includes('linkedin.')) {
       form.setLinkedinText(value);
       form.setName('');
       form.setGithubUrl('');
-    } else {
-      // Pour tout le reste (nom, username GitHub simple, etc.)
-      // On met dans githubUrl SI ça ressemble à un username, sinon name
-      if (value.length > 0 && !value.includes(' ') && value.length < 40) {
-        // Pas d'espace + court = probablement un username GitHub
-        form.setGithubUrl(value);
-        form.setName('');
-      } else {
-        form.setName(value);
-        form.setGithubUrl('');
-      }
+    } 
+    // Username GitHub simple (pas d'espace, court, alphanum avec tirets)
+    else if (value.length > 0 && !value.includes(' ') && value.length < 40 && /^[a-zA-Z0-9_-]+$/.test(value)) {
+      form.setGithubUrl(value);
+      form.setName('');
+      form.setLinkedinText('');
+    } 
+    // Nom complet (contient espace ou caractères spéciaux)
+    else {
+      form.setName(value);
+      form.setGithubUrl('');
       form.setLinkedinText('');
     }
   };
@@ -123,12 +131,93 @@ function ResultsPreview({ response }: { response: ExtractionResponse }) {
     );
   }
 
+  const { sources, analysis } = response.data || {};
+  const webProfile = (response.data as any)?.webProfile;
+  const stats = (response.data as any)?.stats;
+  const skills: Skill[] = analysis?.skills || [];
+  const summary = analysis?.summary || 'Aucune analyse disponible';
+  const name = sources?.name || 'Profil';
+
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg">
-      <h3 className="font-semibold text-gray-900 mb-4">Résultats de l'analyse</h3>
-      <pre className="text-sm text-gray-700 overflow-auto max-h-96">
-        {JSON.stringify(response.data, null, 2)}
-      </pre>
+    <div className="space-y-6">
+      {/* Profile Summary */}
+      <ProfileSummary 
+        name={name}
+        summary={summary}
+        totalSkills={skills.length}
+      />
+
+      {/* Statistics */}
+      {stats && skills.length > 0 && (
+        <SkillsStats stats={stats} />
+      )}
+
+      {/* Skills Grid */}
+      {skills.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Compétences détectées ({skills.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {skills.map((skill, idx) => (
+              <SkillCard key={`${skill.name}-${idx}`} skill={skill} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No skills message */}
+      {skills.length === 0 && (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-gray-600 text-lg">
+            Aucune compétence détectée. Essayez d'ajouter un profil GitHub ou un CV.
+          </p>
+        </div>
+      )}
+
+      {/* GitHub Repos */}
+      {sources?.github?.repos && sources.github.repos.length > 0 && (
+        <GitHubReposList 
+          repos={sources.github.repos}
+          username={sources.github.username}
+          totalStars={sources.github.totalStars}
+        />
+      )}
+
+      {/* Web Profile Results (optional display) */}
+      {webProfile && webProfile.searchResults?.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-3">🌐 Présence Web</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            {webProfile.searchResults.length} résultat(s) trouvé(s) en ligne
+          </p>
+          {webProfile.socialLinks && Object.keys(webProfile.socialLinks).length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(webProfile.socialLinks).map(([platform, url]) => (
+                <a
+                  key={platform}
+                  href={url as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 text-sm"
+                >
+                  {platform}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Debug toggle (optional) */}
+      <details className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <summary className="cursor-pointer text-sm font-medium text-gray-700">
+          🔍 Voir les données brutes (debug)
+        </summary>
+        <pre className="text-xs text-gray-600 overflow-auto max-h-96 mt-3 p-3 bg-white rounded border border-gray-200">
+          {JSON.stringify(response.data, null, 2)}
+        </pre>
+      </details>
     </div>
   );
 }
