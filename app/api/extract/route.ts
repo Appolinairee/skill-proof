@@ -6,47 +6,50 @@ import { SourceExtractor } from '@/lib/services/source-extractor';
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  try {
-    const input = await parseFormData(request);
-    
-    const validator = new ExtractionValidator();
-    validator.validate(input);
+    try {
+        const input = await parseFormData(request);
 
-    const extractor = new SourceExtractor();
-    const sources = await extractor.extract(input);
+        const validator = new ExtractionValidator();
+        validator.validate(input);
 
-    const analysis = await analyzeWithGemini(
-      sources.cv?.rawText,
-      sources.github,
-      sources.linkedin
-    );
+        const extractor = new SourceExtractor();
+        const sources = await extractor.extract(input);
 
-    return NextResponse.json({
-      success: true,
-      data: { sources, analysis },
-    });
-  } catch (error) {
-    return handleError(error);
-  }
+        const analysis = await analyzeWithGemini(
+            sources.cv?.rawText,
+            sources.github,
+            sources.linkedin
+        );
+
+        return NextResponse.json({
+            success: true,
+            data: { sources, analysis },
+        });
+    } catch (error) {
+        return handleError(error);
+    }
 }
 
 async function parseFormData(request: NextRequest) {
-  const formData = await request.formData();
+    const formData = await request.formData();
 
-  return {
-    cvFile: formData.get('cv') as File | null,
-    githubUrl: formData.get('githubUrl') as string | null,
-    linkedinText: formData.get('linkedinText') as string | null,
-    name: formData.get('name') as string,
-  };
+    console.log('Received form data keys:', Array.from(formData.keys()));
+
+    return {
+        cvFile: formData.get('cv') as File | null,
+        githubUrl: formData.get('githubUrl') as string | null,
+        linkedinText: formData.get('linkedinText') as string | null,
+        name: formData.get('name') as string,
+    };
 }
 
 function handleError(error: unknown) {
-  const message = error instanceof Error ? error.message : 'Erreur inconnue';
-  const isValidationError = message.includes('requis');
+    const message = error instanceof Error ? error.message : 'Erreur inconnue';
+    const isValidationError = message.includes('requis');
+    console.error('Extraction error:', message, error);
 
-  return NextResponse.json(
-    { error: "Erreur lors de l'extraction", details: message },
-    { status: isValidationError ? 400 : 500 }
-  );
+    return NextResponse.json(
+        { error: "Erreur lors de l'extraction", details: message },
+        { status: isValidationError ? 400 : 500 }
+    );
 }

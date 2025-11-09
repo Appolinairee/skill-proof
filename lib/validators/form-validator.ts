@@ -5,27 +5,22 @@ export class FormValidator {
     const errors: ExtractionFormErrors = {};
 
     this.validateAtLeastOneSource(data, errors);
-    this.validateName(data.name, errors);
     this.validateGithubUrl(data.githubUrl, errors);
 
     return errors;
-  }
-
-  private validateName(name: string, errors: ExtractionFormErrors): void {
-    const hasName = name && name.trim().length > 0;
-    if (!hasName) {
-      errors.name = 'Le nom est requis';
-    }
   }
 
   private validateAtLeastOneSource(
     data: ExtractionFormData, 
     errors: ExtractionFormErrors
   ): void {
-    const hasSource = data.cvFile || data.githubUrl || data.linkedinText;
+    const hasName = data.name && data.name.trim().length > 0;
+    const hasFile = !!data.cvFile;
+    const hasGithub = data.githubUrl && data.githubUrl.trim().length > 0;
+    const hasLinkedin = data.linkedinText && data.linkedinText.trim().length > 0;
     
-    if (!hasSource) {
-      errors.general = 'Au moins une source est requise (CV, GitHub ou LinkedIn)';
+    if (!hasName && !hasFile && !hasGithub && !hasLinkedin) {
+      errors.general = 'Entrez votre nom, uploadez un CV, ou ajoutez un lien GitHub/LinkedIn';
     }
   }
 

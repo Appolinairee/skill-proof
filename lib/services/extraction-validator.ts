@@ -7,23 +7,17 @@ export interface ExtractionInput {
 
 export class ExtractionValidator {
   validate(input: ExtractionInput): void {
-    this.validateName(input.name);
-    this.validateAtLeastOneSource(input);
+    this.validateAtLeastOneData(input);
   }
 
-  private validateName(name: string | undefined): void {
-    if (!name || name.trim().length === 0) {
-      throw new Error('Le nom est requis');
-    }
-  }
-
-  private validateAtLeastOneSource(input: ExtractionInput): void {
+  private validateAtLeastOneData(input: ExtractionInput): void {
+    const hasName = input.name && input.name.trim().length > 0;
     const hasCv = input.cvFile !== null && input.cvFile !== undefined;
-    const hasGithub = input.githubUrl !== null && input.githubUrl !== undefined;
-    const hasLinkedin = input.linkedinText !== null && input.linkedinText !== undefined;
+    const hasGithub = input.githubUrl && input.githubUrl.trim().length > 0;
+    const hasLinkedin = input.linkedinText && input.linkedinText.trim().length > 0;
 
-    if (!hasCv && !hasGithub && !hasLinkedin) {
-      throw new Error('Au moins une source est requise (CV, GitHub ou LinkedIn)');
+    if (!hasName && !hasCv && !hasGithub && !hasLinkedin) {
+      throw new Error('Au moins une donnée est requise (nom, CV, GitHub ou LinkedIn)');
     }
   }
 }

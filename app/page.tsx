@@ -27,19 +27,15 @@ export default function HomePage() {
   };
 
   const handleInputChange = (value: string) => {
-    const trimmedValue = value.trim();
-
-    if (trimmedValue.includes('github.com') || trimmedValue.match(/^[a-zA-Z0-9-]+$/)) {
-      form.setGithubUrl(trimmedValue);
+    if (value.includes('github.com') || (value.length > 0 && value.match(/^[a-zA-Z0-9-]+$/))) {
+      form.setGithubUrl(value);
       if (!form.state.data.name) {
-        form.setName(trimmedValue.split('/').pop() || trimmedValue);
+        form.setName(value.split('/').pop() || value);
       }
-    } else if (trimmedValue.length > 0) {
-      if (trimmedValue.includes('linkedin.com') || trimmedValue.length > 50) {
-        form.setLinkedinText(trimmedValue);
-      } else {
-        form.setName(trimmedValue);
-      }
+    } else if (value.includes('linkedin.com') || value.length > 100) {
+      form.setLinkedinText(value);
+    } else {
+      form.setName(value);
     }
   };
 
