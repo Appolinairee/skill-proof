@@ -17,7 +17,7 @@ export function ExtractionInput({
     onChange,
     onFileSelect,
     selectedFile,
-    placeholder = 'Votre nom, URL GitHub/LinkedIn, ou collez votre texte...',
+    placeholder = 'Nom, URL GitHub/LinkedIn, ou collez votre texte... (GitHub: torvalds/ ou github.com/torvalds)',
     disabled = false,
     canSubmit = false,
 }: ExtractionInputProps) {

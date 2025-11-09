@@ -27,12 +27,27 @@ export default function HomePage() {
   };
 
   const handleInputChange = (value: string) => {
-    if (value.includes('github.com')) {
+    // Détection simple et permissive
+    if (value.includes('github.com') || value.includes('github.io')) {
       form.setGithubUrl(value);
-    } else if (value.includes('linkedin.com') || value.length > 100) {
+      form.setName('');
+      form.setLinkedinText('');
+    } else if (value.includes('linkedin.com') || value.includes('linkedin.')) {
       form.setLinkedinText(value);
+      form.setName('');
+      form.setGithubUrl('');
     } else {
-      form.setName(value);
+      // Pour tout le reste (nom, username GitHub simple, etc.)
+      // On met dans githubUrl SI ça ressemble à un username, sinon name
+      if (value.length > 0 && !value.includes(' ') && value.length < 40) {
+        // Pas d'espace + court = probablement un username GitHub
+        form.setGithubUrl(value);
+        form.setName('');
+      } else {
+        form.setName(value);
+        form.setGithubUrl('');
+      }
+      form.setLinkedinText('');
     }
   };
 

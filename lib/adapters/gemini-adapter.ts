@@ -18,23 +18,45 @@ export async function analyzeWithGemini(
     githubData?: any,
     linkedinData?: any
 ): Promise<GeminiAnalysisResult> {
+    // 🔍 LOG 1: Données brutes reçues
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📥 DONNÉES BRUTES REÇUES:');
+    console.log('CV Text:', cvText ? `${cvText.substring(0, 200)}...` : 'none');
+    console.log('GitHub Data:', JSON.stringify(githubData, null, 2));
+    console.log('LinkedIn Data:', linkedinData ? JSON.stringify(linkedinData, null, 2) : 'none');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
     const apiKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_CLOUD_API_KEY;
 
     // Fallback mode if no API key
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         console.warn('⚠️ GOOGLE_API_KEY non configurée, utilisation du mode fallback');
-        return generateFallbackAnalysis(githubData);
+        const fallbackResult = generateFallbackAnalysis(githubData);
+        console.log('📤 RÉSULTAT FALLBACK:', JSON.stringify(fallbackResult, null, 2));
+        return fallbackResult;
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = buildAnalysisPrompt(cvText, githubData, linkedinData);
+    
+    // 🔍 LOG 2: Prompt envoyé à Gemini
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📤 PROMPT ENVOYÉ À GEMINI:');
+    console.log(prompt.substring(0, 500) + '...');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     try {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
+
+        // 🔍 LOG 3: Réponse brute de Gemini
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📥 RÉPONSE BRUTE DE GEMINI:');
+        console.log(text);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
         // Parse JSON response from Gemini
         const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -43,12 +65,19 @@ export async function analyzeWithGemini(
         }
 
         const parsed = JSON.parse(jsonMatch[0]);
+        
+        // 🔍 LOG 4: Résultat final parsé
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ RÉSULTAT FINAL PARSÉ:');
+        console.log(JSON.stringify(parsed, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
         return {
             skills: parsed.skills || [],
             summary: parsed.summary || 'Aucune analyse disponible',
         };
     } catch (error) {
-        console.error('Gemini analysis error:', error);
+        console.error('❌ Gemini analysis error:', error);
         throw new Error(`Erreur Gemini: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
 }
