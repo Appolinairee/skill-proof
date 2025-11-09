@@ -2,6 +2,7 @@
 
 export interface CVData {
   rawText: string;
+  images?: Buffer[];
   sections?: {
     experience?: string;
     education?: string;

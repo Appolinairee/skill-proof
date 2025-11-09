@@ -2,25 +2,29 @@ import { CVData } from './types';
 import { SUPPORTED_MIME_TYPES, CV_SECTION_PATTERNS } from './constants';
 import { fileToBuffer, getFileTypeError } from '../utils/file-helpers';
 import { extractError } from '../utils/text-helpers';
-import { parsePdfBuffer } from './parsers/pdf-parser';
+import { parsePdfBuffer, convertPdfToImages } from './parsers/pdf-parser';
 import { parseDocxBuffer } from './parsers/docx-parser';
 import { parseTextBuffer } from './parsers/text-parser';
 import { SectionExtractor } from './section-extractor';
 
 export async function parseCv(file: File): Promise<CVData> {
   try {
-    const rawText = await extractTextFromFile(file);
+    const buffer = await fileToBuffer(file);
+    const rawText = await extractTextFromFile(file, buffer);
     const sections = extractCvSections(rawText);
+    
+    let images: Buffer[] | undefined;
+    if (file.type === SUPPORTED_MIME_TYPES.PDF) {
+      images = await convertPdfToImages(buffer);
+    }
 
-    return { rawText: rawText.trim(), sections };
+    return { rawText: rawText.trim(), images, sections };
   } catch (error) {
     throw new Error(`Erreur lors du parsing du CV: ${extractError(error)}`);
   }
 }
 
-async function extractTextFromFile(file: File): Promise<string> {
-  const buffer = await fileToBuffer(file);
-  
+async function extractTextFromFile(file: File, buffer: Buffer): Promise<string> {
   const parser = getParserForFileType(file.type);
   return parser(buffer);
 }

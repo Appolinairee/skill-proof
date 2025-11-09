@@ -27,11 +27,8 @@ export default function HomePage() {
   };
 
   const handleInputChange = (value: string) => {
-    if (value.includes('github.com') || (value.length > 0 && value.match(/^[a-zA-Z0-9-]+$/))) {
+    if (value.includes('github.com')) {
       form.setGithubUrl(value);
-      if (!form.state.data.name) {
-        form.setName(value.split('/').pop() || value);
-      }
     } else if (value.includes('linkedin.com') || value.length > 100) {
       form.setLinkedinText(value);
     } else {
