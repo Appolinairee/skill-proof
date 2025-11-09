@@ -1,7 +1,4 @@
 "use client";
-
-import { LoginIcon, UserIcon } from "@/public/assets/icons/SideBarIcons";
-import { ROUTES } from "@/utils/constants/routes";
 import { cn } from "@/utils/utils";
 import Link from "next/link";
 

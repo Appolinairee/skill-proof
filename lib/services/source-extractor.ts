@@ -52,7 +52,7 @@ export class SourceExtractor {
   }
 
   private async extractLinkedIn(text: string, sources: ExtractedSources): Promise<void> {
-    sources.linkedin = parseLinkedIn(text);
+    sources.linkedin = await parseLinkedIn(text);
   }
 
   private getErrorMessage(error: unknown): string {

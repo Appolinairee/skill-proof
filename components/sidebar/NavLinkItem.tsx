@@ -1,9 +1,7 @@
 import { cn } from "@/utils/utils";
 import Link from "next/link";
-import { ROUTES } from "@/utils/constants/routes";
-import NotificationLink from "./NotificationLink";
-import MessageLink from "./MessageLink";
 import { NavLinkIcon } from "./NavLinkIcon";
+import { ROUTES } from "@/utils/constants/routes";
 
 export const getCountFromHref = (href: string, user: any) => {
   switch (href) {
@@ -30,28 +28,6 @@ const NavLinkItem = ({
   user?: any;
 }) => {
   const count = getCountFromHref(link.href, user);
-
-  if (link.href === ROUTES.NOTIFICATIONS) {
-    return (
-      <NotificationLink
-        link={link}
-        isActive={isActive}
-        hideText={hideText}
-        count={count}
-      />
-    );
-  }
-
-  if (link.href === ROUTES.MESSAGES) {
-    return (
-      <MessageLink
-        link={link}
-        isActive={isActive}
-        hideText={hideText}
-        count={count}
-      />
-    );
-  }
 
   return (
     <Link

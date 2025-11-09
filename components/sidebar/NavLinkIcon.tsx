@@ -1,6 +1,4 @@
 import { cn } from "@/utils/utils";
-import { SearchZoomIcon } from "@/public/assets/icons/icons";
-import { ROUTES } from "@/utils/constants/routes";
 import { getIcon } from "./IconMap";
 
 export function NavLinkIcon({
@@ -15,16 +13,6 @@ export function NavLinkIcon({
     "group-hover:text-black",
     isActive && "!text-black"
   );
-
-  if (link.href === ROUTES.CATEGORIES) {
-    const IconComponent = getIcon(isActive ? link.iconBold || link.icon : link.icon);
-    return (
-      <>
-        <SearchZoomIcon className={cn(iconClassName, "md:hidden")} />
-        {IconComponent && <IconComponent className={cn(iconClassName, "hidden md:block")} />}
-      </>
-    );
-  }
 
   const IconComponent = getIcon(isActive ? link.iconBold || link.icon : link.icon);
   if (!IconComponent) return null;

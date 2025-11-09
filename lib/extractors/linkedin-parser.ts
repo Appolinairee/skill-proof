@@ -1,13 +1,25 @@
 import { LinkedInData } from './types';
 import { LinkedInJsonParser } from './linkedin/json-parser';
 import { LinkedInTextParser } from './linkedin/text-parser';
+import { parseLinkedInFromUrl } from './linkedin/url-parser';
 
-export function parseLinkedIn(input: string): LinkedInData {
+export async function parseLinkedIn(input: string): Promise<LinkedInData> {
   const data: LinkedInData = { rawText: input };
 
-  const parsedSections = isJsonInput(input) 
-    ? parseAsJson(input) 
-    : parseAsText(input);
+  // Check if it's a LinkedIn URL
+  if (input.includes('linkedin.com/in/')) {
+    try {
+      const urlData = await parseLinkedInFromUrl(input);
+      data.rawText = urlData.extractedText;
+      data.url = urlData.url;
+    } catch (error) {
+      console.warn('⚠️ LinkedIn URL fetch failed, using input as-is:', error);
+    }
+  }
+
+  const parsedSections = isJsonInput(data.rawText) 
+    ? parseAsJson(data.rawText) 
+    : parseAsText(data.rawText);
 
   if (parsedSections) {
     data.parsedSections = parsedSections;
